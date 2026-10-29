@@ -78,6 +78,11 @@
             min-height: 400px;
         }
 
+        /* Apply CSS dark mode filter to free OpenStreetMap tiles */
+        .dark-tiles .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(120%) grayscale(20%);
+        }
+
         .leaflet-popup-content-wrapper {
             background: #141418 !important;
             color: #ffffff !important;
@@ -833,11 +838,11 @@
                 zoomControl: true
             });
 
-            // Dark Mode OpenStreetMap / CartoDB Tiles
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
+            // Reliable OpenStreetMap Free Tiles with Dark CSS Filter
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color:#aaa;">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+                className: 'dark-tiles'
             }).addTo(map);
 
             // Allow user to click anywhere on map to navigate to those coordinates in Google Maps
