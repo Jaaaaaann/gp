@@ -68,11 +68,26 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Leaflet map custom dark theme override */
+        /* Leaflet map custom dark theme override & fix visibility */
         .leaflet-container {
             background-color: #0f0f13 !important;
             font-family: 'Inter', sans-serif !important;
             border-radius: 0.75rem;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 400px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #141418 !important;
+            color: #ffffff !important;
+            border: 1px solid #E50914 !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4) !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #E50914 !important;
         }
 
         /* Custom scrollbar */
@@ -292,25 +307,29 @@
                     <div class="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 flex flex-col space-y-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-map-pin text-brand-red text-lg"></i>
+                                <i class="fa-solid fa-map-pin text-brand-red text-lg animate-bounce"></i>
                                 <h3 class="font-bold text-white text-base">Interactive Tambike Location Pinpoint</h3>
                             </div>
-                            <span class="text-xs text-gray-400 bg-[#0a0a0c] px-3 py-1 rounded-full border border-brand-border">Davao & Tagum Region</span>
+                            <span class="text-xs text-gray-400 bg-[#0a0a0c] px-3 py-1 rounded-full border border-brand-border">Click Pin / Map for Google Route</span>
                         </div>
 
                         <!-- Leaflet Canvas Container -->
-                        <div id="tambikeMap" class="w-full h-[380px] sm:h-[450px] rounded-xl border border-brand-border z-10"></div>
+                        <div class="relative w-full h-[400px] sm:h-[480px] rounded-xl overflow-hidden border border-brand-border">
+                            <div id="tambikeMap" class="w-full h-full z-10"></div>
+                        </div>
 
                         <!-- Active Route / Directions Overlay Info -->
                         <div id="routeInfoBox" class="bg-[#0f0f14] border border-brand-border rounded-xl p-4 hidden">
-                            <div class="flex items-start justify-between">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div>
-                                    <span class="text-[10px] uppercase font-bold tracking-wider text-brand-red">Active Selected Destination</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-brand-red flex items-center gap-1">
+                                        <i class="fa-solid fa-circle-dot text-brand-red"></i> Selected Tambike Destination
+                                    </span>
                                     <h4 id="routeTitle" class="text-lg font-bold text-white">Davao Global Township (DGT)</h4>
                                     <p id="routeLocation" class="text-xs text-gray-400 mt-0.5">Matina, Davao City • Lat: 7.0583, Lng: 125.5960</p>
                                 </div>
-                                <a id="googleRouteBtn" href="#" target="_blank" class="bg-brand-red hover:bg-brand-redHover text-white text-xs font-bold px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow transition">
-                                    <i class="fa-solid fa-diamond-turn-right"></i> Open Google Maps Route
+                                <a id="googleRouteBtn" href="#" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto bg-brand-red hover:bg-brand-redHover text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-red/30 transition">
+                                    <i class="fa-solid fa-diamond-turn-right text-base"></i> Open Google Maps Route
                                 </a>
                             </div>
                         </div>
@@ -799,19 +818,97 @@
 
         // LEAFLET MAP & TAMBIKE LOGIC
         function initLeafletMap() {
-            if (map) return;
+            const mapContainer = document.getElementById('tambikeMap');
+            if (!mapContainer) return;
+
+            if (map) {
+                map.invalidateSize();
+                return;
+            }
 
             // Centered on Davao City Region
-            map = L.map('tambikeMap').setView([7.0731, 125.6128], 11);
+            map = L.map('tambikeMap', {
+                center: [7.0731, 125.6128],
+                zoom: 11,
+                zoomControl: true
+            });
 
-            // Dark Mode OpenStreetMap Tiles
+            // Dark Mode OpenStreetMap / CartoDB Tiles
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
                 subdomains: 'abcd',
                 maxZoom: 19
             }).addTo(map);
 
+            // Allow user to click anywhere on map to navigate to those coordinates in Google Maps
+            map.on('click', function(e) {
+                const lat = e.latlng.lat.toFixed(5);
+                const lng = e.latlng.lng.toFixed(5);
+                
+                document.getElementById('routeInfoBox').classList.remove('hidden');
+                document.getElementById('routeTitle').textContent = `Custom Pinned Point`;
+                document.getElementById('routeLocation').textContent = `Coordinates • Lat: ${lat}, Lng: ${lng}`;
+
+                const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                document.getElementById('googleRouteBtn').href = googleUrl;
+            });
+
             updateMapPins();
+
+            // Force map layout recalculation after modal/tab render
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 250);
+        }
+
+        function updateMapPins() {
+            if (!map) return;
+
+            // Clear old markers
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            // Custom Red Racing Pin Icon
+            const redIcon = L.divIcon({
+                className: 'custom-pin',
+                html: `<div style="background-color: #E50914; width: 28px; height: 28px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 12px rgba(229,9,20,0.9); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <i class="fa-solid fa-motorcycle" style="color: white; font-size: 11px;"></i>
+                       </div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+
+            tambikeEvents.forEach(evt => {
+                const marker = L.marker([evt.lat, evt.lng], { icon: redIcon }).addTo(map);
+                const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${evt.lat},${evt.lng}`;
+
+                marker.bindPopup(`
+                    <div style="padding: 4px;">
+                        <strong style="color: #E50914; font-size: 15px; display: block; margin-bottom: 2px;">${evt.title}</strong>
+                        <div style="color: #ccc; font-size: 12px; margin-bottom: 6px;"><i class="fa-solid fa-location-dot" style="color: #E50914;"></i> ${evt.location}</div>
+                        <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #E50914; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; width: 100%; text-align: center;">
+                            <i class="fa-solid fa-diamond-turn-right"></i> Open Route on Google Maps
+                        </a>
+                    </div>
+                `);
+
+                marker.on('click', () => selectTambikeRoute(evt));
+                mapMarkers.push(marker);
+            });
+        }
+
+        function selectTambikeRoute(evt) {
+            document.getElementById('routeInfoBox').classList.remove('hidden');
+            document.getElementById('routeTitle').textContent = evt.title;
+            document.getElementById('routeLocation').textContent = `${evt.location} • Lat: ${evt.lat}, Lng: ${evt.lng}`;
+
+            // Generate direct Google Maps direction route link
+            const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${evt.lat},${evt.lng}`;
+            document.getElementById('googleRouteBtn').href = googleUrl;
+
+            if (map) {
+                map.flyTo([evt.lat, evt.lng], 14, { duration: 1.2 });
+            }
         }
 
         function updateMapPins() {
