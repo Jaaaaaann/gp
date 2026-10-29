@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GP BOYZ EST. 2026 | Official Club Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS & JS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#E50914',
+                            redHover: '#b80710',
+                            dark: '#0a0a0c',
+                            card: '#141418',
+                            border: '#2a2a32',
+                            accent: '#ff1744'
+                        }
+                    },
+                    fontFamily: {
+                        starduster: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styling for Starduster Expanded Italic Aesthetic */
+        .font-starduster {
+            font-family: 'Orbitron', sans-serif;
+            font-style: italic;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            transform: skewX(-6deg);
+            display: inline-block;
+        }
+
+        .glow-red {
+            text-shadow: 0 0 12px rgba(229, 9, 20, 0.6);
+        }
+        
+        .box-glow {
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.15);
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 24, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Leaflet map custom dark theme override */
+        .leaflet-container {
+            background-color: #0f0f13 !important;
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 0.75rem;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a32;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E50914;
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0c] text-gray-100 min-h-screen flex flex-col font-sans selection:bg-brand-red selection:text-white">
+
+    <!-- AUTHENTICATION CONTAINER (SIGN IN / SIGN UP) -->
+    <div id="authContainer" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a0c]/95 backdrop-blur-md">
+        <div class="w-full max-w-md bg-brand-card border border-brand-border rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden box-glow">
+            <!-- Decorative Red Accent Line -->
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-red via-red-500 to-brand-accent"></div>
+            
+            <!-- Logo Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-red/10 border border-brand-red/30 mb-3 text-brand-red text-2xl">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+                <h1 class="font-starduster text-3xl sm:text-4xl text-white tracking-wider glow-red uppercase">
+                    GP BOYZ
+                </h1>
+                <p class="font-rajdhani text-brand-red font-bold tracking-widest text-lg mt-1">EST. 2026</p>
+                <p class="text-xs text-gray-400 mt-2 uppercase tracking-wider">Official Motorcycle Club Portal</p>
+            </div>
+
+            <!-- Tab Toggles (Sign In / Sign Up) -->
+            <div class="flex bg-[#0d0d11] p-1 rounded-xl mb-6 border border-brand-border/60">
+                <button id="tabSignIn" onclick="switchAuthTab('signin')" class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-brand-red text-white shadow">
+                    Sign In
+                </button>
+                <button id="tabSignUp" onclick="switchAuthTab('signup')" class="flex-1 py-2 text-sm font-semibold text-gray-400 hover:text-white rounded-lg transition-all duration-200">
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- Quick Demo Login Presets -->
+            <div class="mb-5 bg-brand-red/10 border border-brand-red/30 rounded-xl p-3 text-xs">
+                <div class="font-semibold text-brand-red mb-1.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt"></i> Quick Demo Access:
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="fillAuth('admin@gpboyz.com', 'admin123', 'admin')" class="bg-[#1a1a22] hover:bg-brand-red/20 border border-brand-border text-left p-2 rounded text-gray-300 transition">
+                        <span class="block font-bold text-white text-xs">Admin Account</span>
+                        <span class="text-[10px] text-gray-400">Manage Tambikes & Data</span>
+                    </button>
+                    <button onclick="fillAuth('member@gpboyz.com', 'member123', 'member')" class="bg-[#1a1a22] hover:bg-brand-red/20 border border-brand-border text-left p-2 rounded text-gray-300 transition">
+                        <span class="block font-bold text-white text-xs">Member Account</span>
+                        <span class="text-[10px] text-gray-400">View Events & Roster</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="signUpFields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Full Name</label>
+                        <input type="text" id="authName" placeholder="e.g. Jhon Rex Castillo" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Badge #</label>
+                            <input type="text" id="authBadge" placeholder="e.g. 0088" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Unit Model</label>
+                            <input type="text" id="authUnit" placeholder="e.g. Click 160 / ADV" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Email / Username</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-3 text-gray-500 text-sm"></i>
+                        <input type="text" id="authEmail" required value="admin@gpboyz.com" placeholder="name@gpboyz.com" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3 text-gray-500 text-sm"></i>
+                        <input type="password" id="authPassword" required value="admin123" placeholder="••••••••" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div id="roleSelection" class="hidden">
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Account Role</label>
+                    <select id="authRole" class="w-full bg-[#0a0a0c] border border-brand-border focus:border-brand-red rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none transition">
+                        <option value="member">Official Member (OM)</option>
+                        <option value="admin">Admin / Moderator</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full bg-brand-red hover:bg-brand-redHover text-white font-bold py-3 rounded-lg uppercase tracking-wider text-sm transition shadow-lg shadow-brand-red/30 mt-2">
+                    Sign In to Club Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER (HIDDEN UNTIL AUTH) -->
+    <div id="appContainer" class="hidden min-h-screen flex flex-col">
+        
+        <!-- HEADER / NAVIGATION BAR -->
+        <header class="sticky top-0 z-40 bg-[#0a0a0c]/90 backdrop-blur-md border-b border-brand-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    
+                    <!-- Branding Logo -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-red/20 border border-brand-red/50 flex items-center justify-center text-brand-red text-xl">
+                            <i class="fa-solid fa-motorcycle"></i>
+                        </div>
+                        <div>
+                            <div class="font-starduster text-xl sm:text-2xl text-white tracking-wider glow-red leading-none">
+                                GP BOYZ
+                            </div>
+                            <div class="text-[10px] font-rajdhani font-bold text-brand-red tracking-widest uppercase">
+                                EST. 2026 • DAVAO / TAGUM
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Links (Desktop) -->
+                    <nav class="hidden md:flex items-center space-x-1">
+                        <button onclick="switchTab('tambike')" id="nav-tambike" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 bg-brand-red text-white">
+                            <i class="fa-solid fa-map-location-dot"></i> Tambike & Maps
+                        </button>
+                        <button onclick="switchTab('roster')" id="nav-roster" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-[#1a1a22] transition flex items-center gap-2">
+                            <i class="fa-solid fa-users"></i> Member Directory
+                        </button>
+                        <button onclick="switchTab('leaders')" id="nav-leaders" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-[#1a1a22] transition flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved"></i> Leadership
+                        </button>
+                        <button onclick="switchTab('builds')" id="nav-builds" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-[#1a1a22] transition flex items-center gap-2">
+                            <i class="fa-solid fa-gauge-high"></i> Garage Builds
+                        </button>
+                    </nav>
+
+                    <!-- User Profile & Logout -->
+                    <div class="flex items-center gap-3">
+                        <div class="hidden sm:flex flex-col text-right">
+                            <span id="headerUserName" class="text-sm font-bold text-white">Jhon Rex Castillo</span>
+                            <span id="headerUserBadge" class="text-[11px] text-brand-red font-mono font-semibold">BADGE #0001 • FOUNDER</span>
+                        </div>
+                        <button onclick="logout()" title="Sign Out" class="p-2.5 rounded-xl bg-[#1a1a22] border border-brand-border text-gray-400 hover:text-brand-red hover:border-brand-red transition">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mobile Nav Sub-Bar -->
+            <div class="md:hidden flex border-t border-brand-border bg-[#0d0d11] overflow-x-auto p-1.5 gap-1">
+                <button onclick="switchTab('tambike')" id="mob-nav-tambike" class="flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-red text-white flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-map-location-dot"></i> Tambikes
+                </button>
+                <button onclick="switchTab('roster')" id="mob-nav-roster" class="flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:bg-[#1a1a22] flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-users"></i> Directory
+                </button>
+                <button onclick="switchTab('leaders')" id="mob-nav-leaders" class="flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:bg-[#1a1a22] flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved"></i> Leaders
+                </button>
+                <button onclick="switchTab('builds')" id="mob-nav-builds" class="flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:bg-[#1a1a22] flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-gauge-high"></i> Builds
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN BODY CONTENT -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+            
+            <!-- SECTION 1: TAMBIKE ANNOUNCEMENTS & INTERACTIVE MAP -->
+            <section id="section-tambike" class="space-y-6">
+                
+                <!-- Section Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-red animate-ping"></span> Live Club Events
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+                            Tambike Meetups & Directions Map
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Pin exact meet spot locations, view schedules, and calculate route directions for the squad.</p>
+                    </div>
+
+                    <!-- Admin Create Event Toggle Button -->
+                    <div id="adminTambikeControls" class="hidden">
+                        <button onclick="toggleEventModal(true)" class="bg-brand-red hover:bg-brand-redHover text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-brand-red/20 transition">
+                            <i class="fa-solid fa-plus-circle"></i> Create Tambike Announcement
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Grid: Map + Announcements Sidebar -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left/Top: Interactive Map Panel -->
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 flex flex-col space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-map-pin text-brand-red text-lg"></i>
+                                <h3 class="font-bold text-white text-base">Interactive Tambike Location Pinpoint</h3>
+                            </div>
+                            <span class="text-xs text-gray-400 bg-[#0a0a0c] px-3 py-1 rounded-full border border-brand-border">Davao & Tagum Region</span>
+                        </div>
+
+                        <!-- Leaflet Canvas Container -->
+                        <div id="tambikeMap" class="w-full h-[380px] sm:h-[450px] rounded-xl border border-brand-border z-10"></div>
+
+                        <!-- Active Route / Directions Overlay Info -->
+                        <div id="routeInfoBox" class="bg-[#0f0f14] border border-brand-border rounded-xl p-4 hidden">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-brand-red">Active Selected Destination</span>
+                                    <h4 id="routeTitle" class="text-lg font-bold text-white">Davao Global Township (DGT)</h4>
+                                    <p id="routeLocation" class="text-xs text-gray-400 mt-0.5">Matina, Davao City • Lat: 7.0583, Lng: 125.5960</p>
+                                </div>
+                                <a id="googleRouteBtn" href="#" target="_blank" class="bg-brand-red hover:bg-brand-redHover text-white text-xs font-bold px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow transition">
+                                    <i class="fa-solid fa-diamond-turn-right"></i> Open Google Maps Route
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Upcoming Tambike Cards List -->
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-brand-red"></i> Upcoming Tambikes
+                        </h3>
+
+                        <div id="tambikeList" class="space-y-4 max-h-[520px] overflow-y-auto pr-1">
+                            <!-- JS Dynamic Content -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SECTION 2: COMPLETE MEMBER DIRECTORY -->
+            <section id="section-roster" class="hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-2">
+                            Official Registry
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                            Club Roster & Member Directory
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Search members, verify badge numbers, unit models, sticker status, and zone chapters.</p>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative min-w-[200px]">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-xs"></i>
+                            <input type="text" id="memberSearchInput" oninput="filterRoster()" placeholder="Search Name or Badge #" class="w-full bg-brand-card border border-brand-border focus:border-brand-red rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none">
+                        </div>
+                        
+                        <select id="zoneFilter" onchange="filterRoster()" class="bg-brand-card border border-brand-border focus:border-brand-red rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                            <option value="ALL">All Zones</option>
+                            <option value="DAVAO">Davao Chapter</option>
+                            <option value="TAGUM">Tagum Chapter</option>
+                        </select>
+
+                        <select id="unitFilter" onchange="filterRoster()" class="bg-brand-card border border-brand-border focus:border-brand-red rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                            <option value="ALL">All Units</option>
+                            <option value="Click">Honda Click</option>
+                            <option value="ADV">Honda ADV</option>
+                            <option value="Aerox">Yamaha Aerox</option>
+                            <option value="PCX">Honda PCX</option>
+                            <option value="XMAX">Yamaha XMAX</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Directory Grid / Table -->
+                <div class="glass-panel rounded-2xl overflow-hidden border border-brand-border">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-[#0f0f14] text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-brand-border">
+                                <tr>
+                                    <th class="py-3.5 px-4">Badge #</th>
+                                    <th class="py-3.5 px-4">Member Name</th>
+                                    <th class="py-3.5 px-4">Position</th>
+                                    <th class="py-3.5 px-4">Location</th>
+                                    <th class="py-3.5 px-4">Contact</th>
+                                    <th class="py-3.5 px-4">Unit / Color</th>
+                                    <th class="py-3.5 px-4">Sticker</th>
+                                    <th class="py-3.5 px-4">Zone</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rosterTableBody" class="divide-y divide-brand-border/40 text-gray-300">
+                                <!-- Dynamic JS Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="rosterStatsFooter" class="bg-[#0d0d11] px-4 py-3 text-xs text-gray-400 border-t border-brand-border flex justify-between items-center">
+                        <span>Showing <strong id="visibleMemberCount" class="text-white">0</strong> members</span>
+                        <span class="text-brand-red font-semibold">GP BOYZ EST. 2026 OFFICIAL REGISTRY</span>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 3: LEADERSHIP & ADMIN ROSTER -->
+            <section id="section-leaders" class="hidden space-y-6">
+                <div class="border-b border-brand-border/60 pb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-2">
+                        Core Council
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                        Founders, Leaders & Admins
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-400">The founding officers and administration driving GP BOYZ EST. 2026.</p>
+                </div>
+
+                <div id="leadershipGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <!-- Dynamic JS Leadership Cards -->
+                </div>
+            </section>
+
+
+            <!-- SECTION 4: MOTORCYCLE BUILDS SHOWCASE -->
+            <section id="section-builds" class="hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-2">
+                            Garage & Specs
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                            Member Motorcycle Builds
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-400">Custom builds, engine specs, CVT tuning, and aesthetic setups by category model.</p>
+                    </div>
+
+                    <!-- Category Tabs -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="filterBuildCategory('ALL')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-red text-white transition">All Models</button>
+                        <button onclick="filterBuildCategory('Click')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition">Honda Click</button>
+                        <button onclick="filterBuildCategory('ADV')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition">Honda ADV</button>
+                        <button onclick="filterBuildCategory('Aerox')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition">Yamaha Aerox</button>
+                        <button onclick="filterBuildCategory('PCX')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition">Honda PCX</button>
+                        <button onclick="filterBuildCategory('XMAX')" class="build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition">Yamaha XMAX</button>
+                    </div>
+                </div>
+
+                <div id="buildsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic JS Build Cards -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="border-t border-brand-border bg-[#0a0a0c] py-6 text-center text-xs text-gray-500 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="font-starduster text-base text-white tracking-wider glow-red">GP BOYZ</span>
+                    <span class="text-brand-red font-bold">EST. 2026</span>
+                </div>
+                <div>
+                    Davao City & Tagum City Chapters • Official Club Portal
+                </div>
+                <div class="text-gray-400">
+                    <i class="fa-solid fa-shield text-brand-red"></i> Verified Member System
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL: ADD TAMBIKE ANNOUNCEMENT (ADMIN ONLY) -->
+    <div id="eventModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-brand-card border border-brand-border rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+            <button onclick="toggleEventModal(false)" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-brand-red"></i> New Tambike Announcement
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">Set the location pinpoint, date, and meetup agenda for GP BOYZ.</p>
+
+            <form onsubmit="handleCreateEvent(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Event Title</label>
+                    <input type="text" id="evtTitle" required placeholder="e.g. Friday Night Tambike & Coffee" class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Date</label>
+                        <input type="date" id="evtDate" required class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Time</label>
+                        <input type="text" id="evtTime" required placeholder="8:00 PM" class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Location Name</label>
+                    <input type="text" id="evtLocName" required placeholder="e.g. Davao Global Township (DGT), Matina" class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Latitude</label>
+                        <input type="number" step="any" id="evtLat" required value="7.0583" class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Longitude</label>
+                        <input type="number" step="any" id="evtLng" required value="125.5960" class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Description / Route Notes</label>
+                    <textarea id="evtDesc" rows="3" placeholder="Meetup details, route plan, and reminders..." class="w-full bg-[#0a0a0c] border border-brand-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-red"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="toggleEventModal(false)" class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white rounded-lg">Cancel</button>
+                    <button type="submit" class="bg-brand-red hover:bg-brand-redHover text-white px-5 py-2 text-xs font-bold rounded-lg shadow">Publish Announcement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC & DATABASE DATA -->
+    <script>
+        // RAW MEMBER DATABASE PARSED FROM USER IMAGES
+        const clubMembers = [
+            { badge: "0001", name: "Jhon Rex Castillo", position: "founder", location: "Mintal", contact: "09956549247", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0002", name: "PJ Parba", position: "leader", location: "Tacunan", contact: "", unit: "ADV", color: "Army Green", sticker: true, zone: "DAVAO" },
+            { badge: "0003", name: "Mark BMW", position: "admin/mod", location: "Riverside", contact: "9487057573", unit: "Click", color: "Black White", sticker: true, zone: "DAVAO" },
+            { badge: "0004", name: "Jhon Gresos", position: "admin/mod", location: "R.castillo", contact: "9919666283", unit: "Click", color: "White", sticker: true, zone: "DAVAO" },
+            { badge: "0005", name: "Edibonne Anglit", position: "admin/sec", location: "Boulevard", contact: "09920278279", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0006", name: "Angelo Ignacio", position: "admin/adviser", location: "Calinan", contact: "09678034775", unit: "Click", color: "Red", sticker: true, zone: "DAVAO" },
+            { badge: "0007", name: "Phillip Jorolan", position: "admin", location: "Matina Crossing", contact: "9163980017", unit: "Click", color: "White Blue", sticker: true, zone: "DAVAO" },
+            { badge: "0008", name: "Patrick Boncayo", position: "admin", location: "Bago/gamay oten", contact: "9912126336", unit: "Click", color: "White", sticker: true, zone: "DAVAO" },
+            { badge: "0009", name: "Mark Versoza", position: "admin/editor", location: "Lanang", contact: "9185288789", unit: "Click", color: "Red", sticker: true, zone: "DAVAO" },
+            { badge: "0010", name: "Dave Mejares", position: "admin", location: "Malagos", contact: "09933353202", unit: "Click", color: "White Blue", sticker: true, zone: "DAVAO" },
+            { badge: "0011", name: "Kobe Michael Lopez", position: "admin", location: "Malagos", contact: "09640623454", unit: "Aerox", color: "Pink", sticker: true, zone: "DAVAO" },
+            { badge: "0012", name: "Jake Jorolan", position: "Leader/Tagum", location: "La Filipina", contact: "", unit: "Click", color: "Red", sticker: true, zone: "TAGUM" },
+            { badge: "0021", name: "Raine Reyes", position: "OM", location: "Bago", contact: "BADING", unit: "PCX", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0022", name: "Marvin Sonsona", position: "OM", location: "R.castillo", contact: "09456496007", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0023", name: "Joseph Mindajao", position: "OM", location: "Communal", contact: "09270824402", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0025", name: "Evan Casquite", position: "OM", location: "Tigatto", contact: "09092786193", unit: "Click", color: "Red", sticker: true, zone: "DAVAO" },
+            { badge: "0027", name: "Joshua Sarip", position: "OM", location: "Baguio", contact: "09501045965", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0030", name: "Jairo", position: "OM", location: "Rcastillo", contact: "", unit: "Click", color: "Gray", sticker: false, zone: "DAVAO" },
+            { badge: "0032", name: "Karl Mahinay", position: "OM", location: "Juliville", contact: "", unit: "Click 160", color: "White", sticker: true, zone: "DAVAO" },
+            { badge: "0033", name: "Francis Fronjoza", position: "OM", location: "Toril", contact: "9655195200", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0034", name: "Asher Parungao", position: "OM", location: "Cabantian", contact: "09121931818", unit: "Aerox", color: "Red", sticker: true, zone: "DAVAO" },
+            { badge: "0035", name: "John Vincent de Vera", position: "OM", location: "Marfori", contact: "", unit: "XMAX", color: "Matte Black", sticker: true, zone: "DAVAO" },
+            { badge: "0036", name: "Patrick Paquera", position: "OM", location: "Davao", contact: "", unit: "Aerox", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0038", name: "Layzie Moii", position: "OM", location: "Jury's Compound", contact: "", unit: "Click", color: "White", sticker: false, zone: "DAVAO" },
+            { badge: "0039", name: "Johaimen", position: "OM", location: "Blvd", contact: "", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0040", name: "Arbie DATU ABING", position: "OM", location: "Malagos", contact: "", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0041", name: "Shan Michael Vidal", position: "OM", location: "Jerome", contact: "", unit: "Click", color: "Black", sticker: false, zone: "DAVAO" },
+            { badge: "0042", name: "Ronnel Lanquino", position: "OM", location: "Matina Aplaya", contact: "09505460308", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0043", name: "Manuel Benedict Medel", position: "OM", location: "Tacunan", contact: "09657699436", unit: "ADV", color: "Gray", sticker: false, zone: "DAVAO" },
+            { badge: "0044", name: "Chico", position: "OM", location: "Ubalde", contact: "9369409070", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0045", name: "Vincent Navarro Ylanan", position: "OM", location: "Davao", contact: "", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0046", name: "Rhuine Jhee Celocia", position: "OM", location: "Davao", contact: "", unit: "Click", color: "White", sticker: true, zone: "DAVAO" },
+            { badge: "0047", name: "Kenth Jorge Lumangyao", position: "OM", location: "Dumoy", contact: "9941039576", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0048", name: "Ronnian Gomez", position: "OM", location: "Boulevard", contact: "", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0050", name: "Ken Mags", position: "OM", location: "Cabantian", contact: "", unit: "Click", color: "Gray", sticker: true, zone: "DAVAO" },
+            { badge: "0051", name: "Aezcid", position: "OM", location: "Rcastillo", contact: "", unit: "Click", color: "White", sticker: true, zone: "DAVAO" },
+            { badge: "0053", name: "Darryl La Rosa", position: "OM", location: "Rcastillo", contact: "", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0054", name: "Rhunick Clyde Celocia", position: "OM", location: "Bunawan", contact: "9463499161", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0056", name: "John Alfred Imbo", position: "OM", location: "Davao", contact: "", unit: "Click", color: "Black", sticker: true, zone: "DAVAO" },
+            { badge: "0060", name: "Leonard Kent Deloso", position: "OM", location: "Cuambogan", contact: "9632935039", unit: "Click", color: "Black", sticker: false, zone: "TAGUM" },
+            { badge: "0061", name: "Mark Jayson Omega", position: "OM", location: "Tagum", contact: "", unit: "Click", color: "Gray", sticker: false, zone: "TAGUM" },
+            { badge: "0062", name: "Jas Yzen Magno", position: "OM", location: "Tagum", contact: "", unit: "Click", color: "White", sticker: false, zone: "TAGUM" },
+            { badge: "0063", name: "Aljen Jake Cutamora", position: "OM", location: "Panabo", contact: "9164628221", unit: "Click", color: "Black", sticker: false, zone: "TAGUM" },
+            { badge: "0064", name: "Jhemil Cagas", position: "OM", location: "Downtown", contact: "9947642805", unit: "ADV", color: "Red", sticker: false, zone: "TAGUM" },
+            { badge: "0065", name: "Justine Rae Josol", position: "OM", location: "Pioneer 5th Avenue", contact: "9207511459", unit: "Click", color: "Black", sticker: false, zone: "TAGUM" },
+            { badge: "0066", name: "Junstene Fernando", position: "OM", location: "Edashop-Cuambogan", contact: "9912458231", unit: "Click", color: "Gray", sticker: false, zone: "TAGUM" },
+            { badge: "0067", name: "Jemmar Insog", position: "OM", location: "Tagum", contact: "", unit: "Click", color: "Red", sticker: false, zone: "TAGUM" },
+            { badge: "0068", name: "Paul Vincent Almendras", position: "OM", location: "Panabo", contact: "9932981568", unit: "Aerox", color: "Black", sticker: false, zone: "TAGUM" },
+            { badge: "0069", name: "Jay Bert Perez", position: "OM", location: "Tagum", contact: "", unit: "Click", color: "White", sticker: false, zone: "TAGUM" },
+            { badge: "0070", name: "Carl Gumban", position: "OM", location: "Tagum", contact: "", unit: "Click", color: "Black", sticker: false, zone: "TAGUM" },
+            { badge: "0071", name: "Glenn Alinsungay", position: "OM", location: "Tagum", contact: "", unit: "Click 160", color: "Red", sticker: false, zone: "TAGUM" }
+        ];
+
+        // SAMPLE MOTORCYCLE BUILDS DATA
+        const bikeBuilds = [
+            {
+                owner: "Jhon Rex Castillo (#0001)",
+                model: "Click",
+                title: "Honda Click 150i Stealth Spec",
+                color: "Nardo Gray / Gloss Black",
+                engine: "153cc Bore Kit, Custom Head",
+                cvt: "JVT Pulley Set 13.5deg, 12g Rollers",
+                exhaust: "M3 Speed Full Exhaust System",
+                brakes: "Brembo 4-Piston Caliper + 260mm Disc",
+                specs: "Custom ECU remap, RS8 shocks, Domino throttle set."
+            },
+            {
+                owner: "PJ Parba (#0002)",
+                model: "ADV",
+                title: "Honda ADV 160 Tactical Explorer",
+                color: "Army Green Matte",
+                engine: "Stock Honda eSP+ 157cc",
+                cvt: "KOSO High Angle Pulley & Center Spring 1200rpm",
+                exhaust: "Akrapovic Replica Dual Slip-on",
+                brakes: "RCB S1 Radial Master Cylinder",
+                specs: "Crash guard setup, Rigid LED auxiliary lights, extended windshield."
+            },
+            {
+                owner: "Kobe Michael Lopez (#0011)",
+                model: "Aerox",
+                title: "Yamaha Aerox 155 V2 Cyber Pink",
+                color: "Custom Magenta / Piano Black",
+                engine: "62mm Ceramic Cylinder Kit",
+                cvt: "Sun Racing CVT Set with Lightened Flyball",
+                exhaust: "ORBR Stainless Exhaust",
+                brakes: "Nissin Samurai Caliper",
+                specs: "YSS G-Series rear suspension, wide tire kit 140/70 rear."
+            },
+            {
+                owner: "Karl Mahinay (#0032)",
+                model: "Click 160",
+                title: "Honda Click 160 Performance Edition",
+                color: "Pearl White / Red Accents",
+                engine: "157cc eSP+ 4-Valve Tuned",
+                cvt: "BRT Racing CVT Kit",
+                exhaust: "TPOWER Stainless Exhaust Pipe",
+                brakes: "Stock ABS System + Braided Hoses",
+                specs: "Racing Boy rim setup, slick street compound tires."
+            },
+            {
+                owner: "John Vincent de Vera (#0035)",
+                model: "XMAX",
+                title: "Yamaha XMAX 300 Touring Beast",
+                color: "Matte Black",
+                engine: "292cc Blue Core Liquid-Cooled",
+                cvt: "Malossi Multivar 2000 Kit",
+                exhaust: "LeoVince Nero Full System",
+                brakes: "Brembo Gold Series Master & Calipers",
+                specs: "Ohlins Rear Suspension, touring top box setup, custom gel seat."
+            },
+            {
+                owner: "Raine Reyes (#0021)",
+                model: "PCX",
+                title: "Honda PCX 160 Midnight Edition",
+                color: "Gloss Black / Gold Chrome",
+                engine: "Stock 157cc High Efficiency",
+                cvt: "NCY Smooth CVT Pulley",
+                exhaust: "Chicken Pipe V2 Silent High Flow",
+                brakes: "RCB 2-Piston Rear & Front Setup",
+                specs: "Air suspension lowered stance, custom leather stitched seat."
+            }
+        ];
+
+        // INITIAL TAMBIKE ANNOUNCEMENTS DATA
+        let tambikeEvents = [
+            {
+                id: 1,
+                title: "Friday Night City Tambike & Chill",
+                date: "2026-11-06",
+                time: "8:00 PM",
+                location: "Davao Global Township (DGT), Matina",
+                lat: 7.0583,
+                lng: 125.5960,
+                desc: "Weekly Friday night squad meetup. Roll call at 8:30 PM. Photoshot and short city loop afterwards."
+            },
+            {
+                id: 2,
+                title: "GP BOYZ Tagum Chapter Highway Ride",
+                date: "2026-11-15",
+                time: "6:30 AM",
+                location: "La Filipina, Tagum City",
+                lat: 7.4475,
+                lng: 125.8089,
+                desc: "Joint meetup with Davao & Tagum chapters. Takeoff point at Tagum shell bypass. Wear official jersey."
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let currentUser = null;
+        let map = null;
+        let mapMarkers = [];
+
+        // INITIALIZATION ON LOAD
+        window.onload = function() {
+            // Check stored user or default to login screen
+            const savedUser = localStorage.getItem('gpboyz_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                initMainApp();
+            } else {
+                document.getElementById('authContainer').classList.remove('hidden');
+            }
+        };
+
+        // AUTHENTICATION LOGIC
+        function switchAuthTab(type) {
+            const btnIn = document.getElementById('tabSignIn');
+            const btnUp = document.getElementById('tabSignUp');
+            const fields = document.getElementById('signUpFields');
+            const roleSel = document.getElementById('roleSelection');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (type === 'signup') {
+                btnUp.className = "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-brand-red text-white shadow";
+                btnIn.className = "flex-1 py-2 text-sm font-semibold text-gray-400 hover:text-white rounded-lg transition-all duration-200";
+                fields.classList.remove('hidden');
+                roleSel.classList.remove('hidden');
+                submitBtn.textContent = "Create Member Account";
+            } else {
+                btnIn.className = "flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-brand-red text-white shadow";
+                btnUp.className = "flex-1 py-2 text-sm font-semibold text-gray-400 hover:text-white rounded-lg transition-all duration-200";
+                fields.classList.add('hidden');
+                roleSel.classList.add('hidden');
+                submitBtn.textContent = "Sign In to Club Portal";
+            }
+        }
+
+        function fillAuth(email, pass, role) {
+            document.getElementById('authEmail').value = email;
+            document.getElementById('authPassword').value = pass;
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const isSignUp = !document.getElementById('signUpFields').classList.contains('hidden');
+
+            let role = 'member';
+            let name = "Club Member";
+            let badge = "0088";
+
+            if (email.includes('admin') || document.getElementById('authRole').value === 'admin') {
+                role = 'admin';
+                name = "Jhon Rex Castillo";
+                badge = "0001";
+            } else if (isSignUp) {
+                name = document.getElementById('authName').value || "New Member";
+                badge = document.getElementById('authBadge').value || "0099";
+                role = document.getElementById('authRole').value;
+            }
+
+            currentUser = { email, name, badge, role };
+            localStorage.setItem('gpboyz_user', JSON.stringify(currentUser));
+            
+            initMainApp();
+        }
+
+        function logout() {
+            localStorage.removeItem('gpboyz_user');
+            currentUser = null;
+            location.reload();
+        }
+
+        function initMainApp() {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+
+            // Update Header Profile Info
+            document.getElementById('headerUserName').textContent = currentUser.name;
+            document.getElementById('headerUserBadge').textContent = `BADGE #${currentUser.badge} • ${currentUser.role.toUpperCase()}`;
+
+            // Show Admin Event Creation Controls if Admin
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminTambikeControls').classList.remove('hidden');
+            }
+
+            // Render Roster, Leadership, Builds, and Initialize Map
+            renderRoster();
+            renderLeadership();
+            renderBuilds();
+            renderTambikeList();
+
+            setTimeout(() => {
+                initLeafletMap();
+            }, 300);
+        }
+
+        // NAVIGATION TABS SWITCHER
+        function switchTab(tabId) {
+            ['tambike', 'roster', 'leaders', 'builds'].forEach(t => {
+                document.getElementById(`section-${t}`).classList.add('hidden');
+                
+                const navBtn = document.getElementById(`nav-${t}`);
+                const mobBtn = document.getElementById(`mob-nav-${t}`);
+                
+                if (navBtn) navBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-[#1a1a22] transition flex items-center gap-2";
+                if (mobBtn) mobBtn.className = "flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:bg-[#1a1a22] flex items-center justify-center gap-1.5";
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            const activeMob = document.getElementById(`mob-nav-${tabId}`);
+            if (activeNav) activeNav.className = "nav-btn px-4 py-2 rounded-lg text-sm font-semibold bg-brand-red text-white flex items-center gap-2 shadow";
+            if (activeMob) activeMob.className = "flex-1 min-w-max px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-red text-white flex items-center justify-center gap-1.5 shadow";
+
+            if (tabId === 'tambike' && map) {
+                setTimeout(() => map.invalidateSize(), 200);
+            }
+        }
+
+        // LEAFLET MAP & TAMBIKE LOGIC
+        function initLeafletMap() {
+            if (map) return;
+
+            // Centered on Davao City Region
+            map = L.map('tambikeMap').setView([7.0731, 125.6128], 11);
+
+            // Dark Mode OpenStreetMap Tiles
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            updateMapPins();
+        }
+
+        function updateMapPins() {
+            if (!map) return;
+
+            // Clear old markers
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            // Custom Red Racing Pin Icon
+            const redIcon = L.divIcon({
+                className: 'custom-pin',
+                html: `<div style="background-color: #E50914; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(229,9,20,0.8); display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-motorcycle" style="color: white; font-size: 9px;"></i></div>`,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            });
+
+            tambikeEvents.forEach(evt => {
+                const marker = L.marker([evt.lat, evt.lng], { icon: redIcon }).addTo(map);
+                marker.bindPopup(`
+                    <div style="color: #000; font-family: sans-serif; padding: 2px;">
+                        <strong style="color: #E50914; font-size: 14px;">${evt.title}</strong><br/>
+                        <small style="color: #444;">${evt.location}</small><br/>
+                        <div style="margin-top: 6px; font-weight: bold; font-size: 11px;">${evt.date} @ ${evt.time}</div>
+                    </div>
+                `);
+
+                marker.on('click', () => selectTambikeRoute(evt));
+                mapMarkers.push(marker);
+            });
+        }
+
+        function selectTambikeRoute(evt) {
+            document.getElementById('routeInfoBox').classList.remove('hidden');
+            document.getElementById('routeTitle').textContent = evt.title;
+            document.getElementById('routeLocation').textContent = `${evt.location} • Lat: ${evt.lat}, Lng: ${evt.lng}`;
+
+            // Generate direct Google Maps direction route link
+            const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${evt.lat},${evt.lng}`;
+            document.getElementById('googleRouteBtn').href = googleUrl;
+
+            map.flyTo([evt.lat, evt.lng], 14, { duration: 1.2 });
+        }
+
+        function renderTambikeList() {
+            const container = document.getElementById('tambikeList');
+            container.innerHTML = tambikeEvents.map(evt => `
+                <div class="glass-panel p-4 rounded-xl border border-brand-border hover:border-brand-red transition space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <h4 class="font-bold text-white text-base leading-snug">${evt.title}</h4>
+                        <span class="bg-brand-red/20 text-brand-red border border-brand-red/40 text-[10px] font-bold px-2 py-0.5 rounded uppercase">${evt.time}</span>
+                    </div>
+                    <div class="text-xs text-gray-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-brand-red"></i> ${evt.location}
+                    </div>
+                    <div class="text-xs text-gray-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar text-gray-500"></i> ${evt.date}
+                    </div>
+                    <p class="text-xs text-gray-400 pt-1 border-t border-brand-border/40">${evt.desc}</p>
+                    <div class="pt-1 flex gap-2">
+                        <button onclick="selectTambikeRoute(${JSON.stringify(evt).replace(/"/g, '&quot;')})" class="flex-1 bg-[#1a1a22] hover:bg-brand-red hover:text-white border border-brand-border text-xs font-semibold py-1.5 rounded-lg text-gray-200 transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-crosshairs"></i> Pin on Map
+                        </button>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${evt.lat},${evt.lng}" target="_blank" class="bg-brand-red hover:bg-brand-redHover text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 shadow">
+                            <i class="fa-solid fa-route"></i> Route
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleEventModal(show) {
+            document.getElementById('eventModal').classList.toggle('hidden', !show);
+        }
+
+        function handleCreateEvent(e) {
+            e.preventDefault();
+            const newEvt = {
+                id: Date.now(),
+                title: document.getElementById('evtTitle').value,
+                date: document.getElementById('evtDate').value,
+                time: document.getElementById('evtTime').value,
+                location: document.getElementById('evtLocName').value,
+                lat: parseFloat(document.getElementById('evtLat').value),
+                lng: parseFloat(document.getElementById('evtLng').value),
+                desc: document.getElementById('evtDesc').value
+            };
+
+            tambikeEvents.unshift(newEvt);
+            renderTambikeList();
+            updateMapPins();
+            toggleEventModal(false);
+            selectTambikeRoute(newEvt);
+        }
+
+        // MEMBER DIRECTORY LOGIC
+        function renderRoster(data = clubMembers) {
+            const tbody = document.getElementById('rosterTableBody');
+            document.getElementById('visibleMemberCount').textContent = data.length;
+
+            tbody.innerHTML = data.map(m => `
+                <tr class="hover:bg-brand-card/80 transition">
+                    <td class="py-3 px-4 font-mono font-bold text-brand-red">#${m.badge}</td>
+                    <td class="py-3 px-4 font-semibold text-white">${m.name}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 text-[11px] font-bold rounded ${
+                            m.position.toLowerCase().includes('founder') ? 'bg-red-950 text-red-300 border border-red-700' :
+                            m.position.toLowerCase().includes('leader') ? 'bg-amber-950 text-amber-300 border border-amber-700' :
+                            m.position.toLowerCase().includes('admin') ? 'bg-purple-950 text-purple-300 border border-purple-700' :
+                            'bg-gray-800 text-gray-300'
+                        }">${m.position.toUpperCase()}</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs text-gray-300">${m.location || '—'}</td>
+                    <td class="py-3 px-4 text-xs font-mono text-gray-400">${m.contact || '—'}</td>
+                    <td class="py-3 px-4 text-xs">
+                        <span class="font-bold text-white">${m.unit}</span> 
+                        <span class="text-gray-400">(${m.color})</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs">
+                        ${m.sticker ? '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> Issued</span>' : '<span class="text-gray-500">Pending</span>'}
+                    </td>
+                    <td class="py-3 px-4 text-xs">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${m.zone === 'TAGUM' ? 'bg-blue-900/40 text-blue-300 border border-blue-800' : 'bg-red-900/40 text-red-300 border border-red-800'}">${m.zone}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterRoster() {
+            const query = document.getElementById('memberSearchInput').value.toLowerCase();
+            const zone = document.getElementById('zoneFilter').value;
+            const unit = document.getElementById('unitFilter').value;
+
+            const filtered = clubMembers.filter(m => {
+                const matchesSearch = m.name.toLowerCase().includes(query) || m.badge.includes(query) || m.location.toLowerCase().includes(query);
+                const matchesZone = zone === 'ALL' || m.zone === zone;
+                const matchesUnit = unit === 'ALL' || m.unit.toLowerCase().includes(unit.toLowerCase());
+                return matchesSearch && matchesZone && matchesUnit;
+            });
+
+            renderRoster(filtered);
+        }
+
+        // LEADERSHIP SHOWCASE LOGIC
+        function renderLeadership() {
+            const leaders = clubMembers.filter(m => 
+                m.position.toLowerCase().includes('founder') || 
+                m.position.toLowerCase().includes('leader') || 
+                m.position.toLowerCase().includes('admin')
+            );
+
+            const grid = document.getElementById('leadershipGrid');
+            grid.innerHTML = leaders.map(l => `
+                <div class="glass-panel rounded-2xl p-5 border border-brand-border hover:border-brand-red transition relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-brand-red/10 rounded-bl-full pointer-events-none group-hover:bg-brand-red/20 transition"></div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#0a0a0c] border border-brand-red/40 flex items-center justify-center font-starduster text-brand-red text-lg">
+                            #${l.badge.slice(-2)}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-base">${l.name}</h3>
+                            <span class="text-xs text-brand-red font-mono font-bold uppercase">${l.position}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 text-xs text-gray-300 border-t border-brand-border/40 pt-3">
+                        <div class="flex justify-between"><span class="text-gray-500">Badge ID:</span> <span class="font-mono text-white">#${l.badge}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Location:</span> <span>${l.location}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Primary Ride:</span> <span>${l.unit} (${l.color})</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Chapter Zone:</span> <span class="text-brand-red font-bold">${l.zone}</span></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // GARAGE BUILDS LOGIC
+        function renderBuilds(category = 'ALL') {
+            const grid = document.getElementById('buildsGrid');
+            const filtered = category === 'ALL' ? bikeBuilds : bikeBuilds.filter(b => b.model.toLowerCase() === category.toLowerCase());
+
+            grid.innerHTML = filtered.map(b => `
+                <div class="glass-panel rounded-2xl p-5 border border-brand-border hover:border-brand-red transition space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 rounded-lg bg-brand-red/20 text-brand-red text-xs font-bold border border-brand-red/40 uppercase">${b.model}</span>
+                        <span class="text-xs text-gray-400 font-mono">${b.owner}</span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold text-white">${b.title}</h3>
+                        <p class="text-xs text-gray-400 mt-0.5"><i class="fa-solid fa-palette text-gray-500"></i> ${b.color}</p>
+                    </div>
+
+                    <div class="bg-[#0a0a0c] p-3 rounded-xl border border-brand-border/60 space-y-2 text-xs">
+                        <div><strong class="text-brand-red">Engine & Head:</strong> <span class="text-gray-300">${b.engine}</span></div>
+                        <div><strong class="text-brand-red">CVT & Transmission:</strong> <span class="text-gray-300">${b.cvt}</span></div>
+                        <div><strong class="text-brand-red">Exhaust:</strong> <span class="text-gray-300">${b.exhaust}</span></div>
+                        <div><strong class="text-brand-red">Braking Setup:</strong> <span class="text-gray-300">${b.brakes}</span></div>
+                    </div>
+
+                    <p class="text-xs text-gray-400 italic">"${b.specs}"</p>
+                </div>
+            `).join('');
+        }
+
+        function filterBuildCategory(cat) {
+            document.querySelectorAll('.build-cat-btn').forEach(btn => {
+                btn.className = "build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1a1a22] text-gray-300 hover:text-white transition";
+            });
+            event.target.className = "build-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-red text-white transition";
+            renderBuilds(cat);
+        }
+    </script>
+</body>
+</html>
